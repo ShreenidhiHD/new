@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { DataGridPro, esES, useGridApiRef } from '../../opengrid';
+import { isEmbedded, toolbarSlotProps } from '../env';
 import { createUsers } from '../data';
 
 const columns = [
@@ -119,8 +120,22 @@ export default function ApiDemo({ theme }) {
             },
         },
         { label: 'Open filter panel', fn: (api) => api.showFilterPanel('name') },
-        { label: 'Export CSV', fn: (api) => api.exportDataAsCsv({ fileName: 'users' }) },
-        { label: 'Print', fn: (api) => api.exportDataAsPrint({ fileName: 'Users' }) },
+        // Embedded previews block downloads and printing, so offer the CSV on the clipboard instead.
+        isEmbedded
+            ? {
+                  label: 'Copy CSV (getDataAsCsv)',
+                  fn: (api) => {
+                      const csv = api.getDataAsCsv();
+                      const done = () =>
+                          setEvents((prev) => [
+                              { name: 'getDataAsCsv', detail: `${csv.split('\r\n').length - 1} rows copied` },
+                              ...prev,
+                          ]);
+                      if (navigator.clipboard) navigator.clipboard.writeText(csv).then(done, done);
+                  },
+              }
+            : { label: 'Export CSV', fn: (api) => api.exportDataAsCsv({ fileName: 'users' }) },
+        !isEmbedded && { label: 'Print', fn: (api) => api.exportDataAsPrint({ fileName: 'Users' }) },
         {
             label: 'Save state',
             fn: (api) => {
@@ -139,7 +154,7 @@ export default function ApiDemo({ theme }) {
     return (
         <div className="demo-section">
             <div className="demo-controls demo-actions">
-                {actions.map((action) => (
+                {actions.filter(Boolean).map((action) => (
                     <button
                         key={action.label}
                         type="button"
@@ -167,6 +182,7 @@ export default function ApiDemo({ theme }) {
                         theme={theme}
                         checkboxSelection
                         showToolbar
+                        slotProps={{ toolbar: toolbarSlotProps }}
                         pagination
                         pageSizeOptions={[25, 100, 500]}
                         initialState={{ pagination: { paginationModel: { page: 0, pageSize: 100 } } }}

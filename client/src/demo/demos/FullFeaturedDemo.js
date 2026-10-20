@@ -6,6 +6,7 @@ import {
     GridActionsCellItem,
     Icon,
 } from '../../opengrid';
+import { toolbarSlotProps } from '../env';
 import { COMMODITIES, COUNTRIES, STATUSES, createCommodityRows } from '../data';
 import { Avatar, Country, Pnl, ProgressBar, StatusChip, currency, percent } from '../renderers';
 
@@ -353,6 +354,7 @@ export default function FullFeaturedDemo({ theme }) {
                     columns={columns}
                     theme={theme}
                     showToolbar
+                    slotProps={{ toolbar: toolbarSlotProps }}
                     checkboxSelection={options.checkboxSelection}
                     headerFilters={options.headerFilters}
                     columnGroupingModel={options.columnGroups ? columnGroupingModel : undefined}

@@ -1,5 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { DataGridPro, gridFilterRows, gridSortRows } from '../../opengrid';
+import { toolbarSlotProps } from '../env';
 import { COMMODITIES, STATUSES, createCommodityRows } from '../data';
 import { StatusChip, currency } from '../renderers';
 
@@ -137,7 +138,7 @@ export default function ServerSideDemo({ theme }) {
                             theme={theme}
                             loading={loadingMore}
                             onRowsScrollEnd={loadMore}
-                            slotProps={{ loadingOverlay: { variant: 'linear-progress' } }}
+                            slotProps={{ loadingOverlay: { variant: 'linear-progress' }, toolbar: toolbarSlotProps }}
                             showToolbar
                             aria-label="Infinite scroll"
                         />
@@ -153,7 +154,10 @@ export default function ServerSideDemo({ theme }) {
                             initialState={{ pagination: { paginationModel: { page: 0, pageSize: 50 } } }}
                             theme={theme}
                             headerFilters
-                            slotProps={{ loadingOverlay: { variant: 'linear-progress', noRowsVariant: 'skeleton' } }}
+                            slotProps={{
+                                loadingOverlay: { variant: 'linear-progress', noRowsVariant: 'skeleton' },
+                                toolbar: toolbarSlotProps,
+                            }}
                             showToolbar
                             aria-label="Server-side data"
                         />

@@ -60,6 +60,9 @@ const readHash = () => {
 };
 
 const initialTheme = () => {
+    // A host page (e.g. an embedding viewer) may already have chosen a theme.
+    const hostTheme = document.documentElement.dataset.theme;
+    if (hostTheme === 'light' || hostTheme === 'dark') return hostTheme;
     try {
         const stored = window.localStorage.getItem('opengrid-theme');
         if (stored === 'light' || stored === 'dark') return stored;
@@ -77,6 +80,16 @@ function App() {
         const onHash = () => setActive(readHash());
         window.addEventListener('hashchange', onHash);
         return () => window.removeEventListener('hashchange', onHash);
+    }, []);
+
+    // Follow theme changes made by the host page.
+    useEffect(() => {
+        const observer = new MutationObserver(() => {
+            const next = document.documentElement.dataset.theme;
+            if (next === 'light' || next === 'dark') setTheme(next);
+        });
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+        return () => observer.disconnect();
     }, []);
 
     useEffect(() => {

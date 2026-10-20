@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { DataGridPro } from '../../opengrid';
+import { toolbarSlotProps } from '../env';
 import { createFileTree, createOrgChart } from '../data';
 import { currency } from '../renderers';
 
@@ -64,6 +65,7 @@ export default function TreeDataDemo({ theme }) {
                     rowSelectionPropagation={{ descendants: true, parents: true }}
                     disableRowSelectionOnClick
                     showToolbar
+                    slotProps={{ toolbar: toolbarSlotProps }}
                     theme={theme}
                     aria-label="Tree data"
                 />
