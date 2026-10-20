@@ -3,6 +3,21 @@
 </p>
 <h1 align="center">BOILERPLATE</h1>
 
+## OpenGrid
+
+This repository now ships **OpenGrid** — an open-source React data grid that reproduces the MUI X Data Grid Pro
+feature set (virtualization, column pinning & reordering, column groups, tree data, master detail, row pinning &
+reordering, header filters, multi-sort/filter, cell & row editing, lazy loading, CSV/print export, `apiRef`, state
+persistence, dark mode) with zero runtime dependencies besides React.
+
+* Library: [`client/src/opengrid`](client/src/opengrid) — see its [README](client/src/opengrid/README.md) for the
+  feature matrix, props and API.
+* Playground: [`client/src/demo`](client/src/demo), rendered by the React app. Run `yarn run client` and open
+  [http://localhost:3000](http://localhost:3000).
+* Tests: `cd client && CI=true yarn test --watchAll=false`.
+
+---
+
 This is a boilerplate repo for creating new mern stack apps that doesn't sucks.
 
 This is minimalist boilerplate for Full Stack MERN developers *(Recommended for beginners only)*. This boilerplate provides basic configurations like:
