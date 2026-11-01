@@ -7,10 +7,10 @@
 import { Bus } from './bus.js';
 import { loadAgents, askAgent } from './agents.js';
 
-const bus = new Bus();
-const [cmd, ...rest] = process.argv.slice(2);
 const print = (v) => console.log(typeof v === 'string' ? v : JSON.stringify(v, null, 2));
 
+export async function runCli([cmd, ...rest]) {
+  const bus = new Bus();
 try {
   switch (cmd) {
     case 'inbox':
@@ -38,10 +38,22 @@ try {
       break;
     }
     default:
-      print('usage: agent-relay <inbox [agent] | send <from> <to> <msg> | threads | thread <id> | tasks [status] | ask <agent> <prompt> | watch [agent]>');
+      print('usage: agent-relay <serve | inbox [agent] | send <from> <to> <msg> | threads | thread <id> | tasks [status] | ask <agent> <prompt> | watch [agent]>');
       process.exitCode = cmd ? 1 : 0;
   }
 } catch (e) {
   console.error(`error: ${e.message}`);
   process.exitCode = 1;
 }
+}
+
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
+const isMain = (() => {
+  try {
+    return fs.realpathSync(process.argv[1]) === fileURLToPath(import.meta.url);
+  } catch {
+    return false;
+  }
+})();
+if (isMain) await runCli(process.argv.slice(2));

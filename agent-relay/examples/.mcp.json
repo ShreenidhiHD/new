@@ -3,7 +3,7 @@
     "agent-relay": {
       "type": "stdio",
       "command": "node",
-      "args": ["/ABSOLUTE/PATH/TO/agent-relay/src/server.js"],
+      "args": ["/ABSOLUTE/PATH/TO/agent-relay/src/bin.js"],
       "env": { "AGENT_NAME": "claude-code" }
     }
   }

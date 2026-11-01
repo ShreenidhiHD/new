@@ -188,15 +188,7 @@ async function handle(msg) {
   }
 }
 
-const isMain = (() => {
-  try {
-    return fs.realpathSync(process.argv[1]) === fileURLToPath(import.meta.url);
-  } catch {
-    return false;
-  }
-})();
-
-if (isMain) {
+export function startServer() {
   const rl = readline.createInterface({ input: process.stdin });
   rl.on('line', (line) => {
     if (!line.trim()) return;
@@ -210,3 +202,13 @@ if (isMain) {
   });
   process.stderr.write(`[agent-relay] agent=${AGENT} bus=${bus.dir}\n`);
 }
+
+const isMain = (() => {
+  try {
+    return fs.realpathSync(process.argv[1]) === fileURLToPath(import.meta.url);
+  } catch {
+    return false;
+  }
+})();
+
+if (isMain) startServer();

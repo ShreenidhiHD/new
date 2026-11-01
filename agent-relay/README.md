@@ -32,28 +32,36 @@ It is a small **MCP server** with no dependencies. Every coding agent loads it. 
 
   You can still send messages and hand off tasks without any of these CLIs.
 
-## Setup
+## Setup (easiest)
+
+### VS Code: install the extension
+
+1. Download `agent-relay-<version>.vsix` from the GitHub Releases page, or build it yourself: `cd vscode-extension && npm run package`.
+2. In VS Code, go to **Extensions → ⋯ → Install from VSIX…**. You can also run `code --install-extension agent-relay-0.1.0.vsix`.
+3. Open Copilot Chat in **Agent** mode with any model. **Agent Relay** now appears under **Tools 🔧**. You don't need `mcp.json` or Node.
+4. From the Command Palette, run **Agent Relay: Set Up Claude Code**. It registers the same relay with Claude Code.
+5. Optional: run **Agent Relay: Add Agent Instructions to Workspace**.
+
+The extension also adds a status bar badge for unread messages, plus Show Inbox, Show Tasks and Send Message commands. See [`vscode-extension/README.md`](vscode-extension/README.md).
+
+### Claude Code only: one line
 
 ```bash
-git clone <this repo> ~/agent-relay
-cd ~/agent-relay && npm test
+claude mcp add agent-relay --scope user -e AGENT_NAME=claude-code -- npx -y github:ShreenidhiHD/agent-relay
 ```
 
-### 1. Claude Code
+### Manual: from a clone
 
 ```bash
-claude mcp add agent-relay --scope user -e AGENT_NAME=claude-code -- node ~/agent-relay/src/server.js
+git clone https://github.com/ShreenidhiHD/agent-relay ~/agent-relay
+claude mcp add agent-relay --scope user -e AGENT_NAME=claude-code -- node ~/agent-relay/src/bin.js
 ```
 
-Or copy `examples/.mcp.json` into your project root and fix the path.
+For VS Code without the extension, copy `examples/.vscode/mcp.json` to `.vscode/mcp.json` and fix the path. For per-project Claude Code config, use `examples/.mcp.json`.
 
-### 2. VS Code GitHub Copilot (Agent mode)
+### Tell the agents to use it
 
-Copy `examples/.vscode/mcp.json` to `.vscode/mcp.json` in your workspace and fix the path. Then open Copilot Chat, switch to **Agent** mode, pick any model (Gemini, GPT, …) and enable the `agent-relay` tools.
-
-### 3. Tell the agents to use it
-
-Paste `examples/AGENT_INSTRUCTIONS.md` into `CLAUDE.md` and into `.github/copilot-instructions.md`.
+Paste `examples/AGENT_INSTRUCTIONS.md` into `CLAUDE.md` and into `.github/copilot-instructions.md`. The extension's **Add Agent Instructions** command does this for you.
 
 ## Try the demo
 

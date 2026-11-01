@@ -7,7 +7,13 @@ import { fileURLToPath } from 'node:url';
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const MAX_DEPTH = Number(process.env.AGENT_RELAY_MAX_DEPTH || 2);
 
-export function loadAgents(file = process.env.AGENT_RELAY_AGENTS || path.join(here, '..', 'agents.json')) {
+function defaultAgentsFile() {
+  // Repo layout: src/../agents.json. Bundled layout (VS Code extension): next to the code.
+  const candidates = [path.join(here, '..', 'agents.json'), path.join(here, 'agents.json')];
+  return candidates.find((f) => fs.existsSync(f)) || candidates[0];
+}
+
+export function loadAgents(file = process.env.AGENT_RELAY_AGENTS || defaultAgentsFile()) {
   const cfg = JSON.parse(fs.readFileSync(file, 'utf8'));
   return cfg.agents || {};
 }
