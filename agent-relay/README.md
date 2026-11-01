@@ -39,7 +39,7 @@ It is a small **MCP server** with no dependencies. Every coding agent loads it. 
 ### VS Code: install the extension
 
 1. Download `agent-relay-<version>.vsix` from the GitHub Releases page, or build it yourself: `cd vscode-extension && npm run package`.
-2. In VS Code, go to **Extensions → ⋯ → Install from VSIX…**. You can also run `code --install-extension agent-relay-0.1.0.vsix`.
+2. In VS Code, go to **Extensions → ⋯ → Install from VSIX…**. You can also run `code --install-extension agent-relay-0.2.0.vsix`.
 3. Open Copilot Chat in **Agent** mode with any model. **Agent Relay** now appears under **Tools 🔧**. You don't need `mcp.json` or Node.
 4. From the Command Palette, run **Agent Relay: Set Up Claude Code**. It registers the same relay with Claude Code.
 5. Optional: run **Agent Relay: Add Agent Instructions to Workspace**.
