@@ -1,0 +1,20 @@
+{
+  "_comment": "Agents that ask_agent can invoke directly. {prompt} is replaced by the prompt (passed as one argv entry, no shell). Edit models/flags to match your installed CLIs.",
+  "agents": {
+    "claude-code": {
+      "description": "Anthropic Claude Code CLI (headless mode)",
+      "command": "claude",
+      "args": ["-p", "{prompt}", "--output-format", "text"]
+    },
+    "gemini": {
+      "description": "Google Gemini CLI (headless mode)",
+      "command": "gemini",
+      "args": ["-m", "gemini-2.5-pro", "-p", "{prompt}"]
+    },
+    "copilot": {
+      "description": "GitHub Copilot CLI (headless mode); pick the model with --model",
+      "command": "copilot",
+      "args": ["-p", "{prompt}"]
+    }
+  }
+}

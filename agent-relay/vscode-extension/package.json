@@ -1,0 +1,59 @@
+{
+  "name": "agent-relay",
+  "displayName": "Agent Relay — Claude Code ⇄ Copilot",
+  "description": "Lets GitHub Copilot (any model: Gemini, GPT, Claude…) and Claude Code message each other, hand off tasks, and ask each other directly. Registers the Agent Relay MCP server automatically.",
+  "version": "0.2.0",
+  "publisher": "shreenidhihd",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/ShreenidhiHD/agent-relay" },
+  "engines": { "vscode": "^1.101.0" },
+  "categories": ["AI", "Chat", "Other"],
+  "keywords": ["mcp", "copilot", "claude code", "gemini", "multi-agent"],
+  "icon": "media/icon.png",
+  "main": "./extension.js",
+  "activationEvents": ["onStartupFinished"],
+  "contributes": {
+    "mcpServerDefinitionProviders": [
+      { "id": "agentRelay", "label": "Agent Relay" }
+    ],
+    "commands": [
+      { "command": "agentRelay.showInbox", "title": "Agent Relay: Show Inbox" },
+      { "command": "agentRelay.showTasks", "title": "Agent Relay: Show Tasks" },
+      { "command": "agentRelay.sendMessage", "title": "Agent Relay: Send Message" },
+      { "command": "agentRelay.setupClaudeCode", "title": "Agent Relay: Set Up Claude Code" },
+      { "command": "agentRelay.copyInstructions", "title": "Agent Relay: Add Agent Instructions to Workspace" },
+      { "command": "agentRelay.installSkills", "title": "Agent Relay: Install Skills to Workspace (Claude Code + Copilot)" }
+    ],
+    "configuration": {
+      "title": "Agent Relay",
+      "properties": {
+        "agentRelay.agentName": {
+          "type": "string",
+          "default": "copilot",
+          "description": "This VS Code agent's name on the relay. Other agents address it by this name."
+        },
+        "agentRelay.busDir": {
+          "type": "string",
+          "default": "",
+          "description": "Shared storage folder. Empty = ~/.agent-relay. Must match the folder Claude Code uses."
+        },
+        "agentRelay.agentsFile": {
+          "type": "string",
+          "default": "",
+          "description": "Path to an agents.json for ask_agent (which CLIs/models to run). Empty = bundled default."
+        },
+        "agentRelay.pollSeconds": {
+          "type": "number",
+          "default": 5,
+          "minimum": 1,
+          "description": "How often to refresh the unread badge in the status bar."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "bundle-server": "node scripts/bundle-server.js",
+    "test": "npm run bundle-server && node --test test/*.test.js",
+    "package": "npm run bundle-server && npx -y @vscode/vsce package --no-dependencies"
+  }
+}

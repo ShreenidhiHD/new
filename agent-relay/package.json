@@ -1,0 +1,33 @@
+{
+  "name": "agent-relay",
+  "version": "0.2.0",
+  "description": "MCP bridge so Claude Code and VS Code GitHub Copilot (any model, e.g. Gemini) can message, hand off tasks to, and directly ask each other.",
+  "type": "module",
+  "bin": {
+    "agent-relay": "src/bin.js"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/*.test.js",
+    "demo": "node examples/demo.js",
+    "test:extension": "cd vscode-extension && npm test",
+    "package:extension": "cd vscode-extension && npm run package"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "files": [
+    "src",
+    "skills",
+    "docs",
+    "agents.json",
+    "examples",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ShreenidhiHD/agent-relay.git"
+  }
+}
