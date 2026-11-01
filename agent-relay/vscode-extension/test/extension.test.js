@@ -60,7 +60,7 @@ const context = {
 test('activate registers MCP provider and commands', () => {
   ext.activate(context);
   assert.ok(registered.providers.agentRelay);
-  for (const c of ['showInbox', 'showTasks', 'sendMessage', 'setupClaudeCode', 'copyInstructions']) {
+  for (const c of ['showInbox', 'showTasks', 'sendMessage', 'setupClaudeCode', 'copyInstructions', 'installSkills']) {
     assert.ok(registered.commands[`agentRelay.${c}`], c);
   }
 });
@@ -98,6 +98,18 @@ test('setupClaudeCode installs a stable server copy outside the extension folder
   await registered.commands['agentRelay.setupClaudeCode']();
   assert.ok(fs.existsSync(path.join(busDir, 'server', 'bin.js')));
   assert.ok(fs.existsSync(path.join(busDir, 'server', 'agents.json')));
+});
+
+test('installSkills writes SKILL.md files for both agents into the workspace', async () => {
+  const ws = fs.mkdtempSync(path.join(os.tmpdir(), 'relay-ws-'));
+  fakeVscode.workspace.workspaceFolders = [{ uri: { fsPath: ws } }];
+  ui.quickPicks.push((items) => items[0]);
+  await registered.commands['agentRelay.installSkills']();
+  for (const base of ['.claude', '.github']) {
+    for (const s of ['agent-relay-loop-safety', 'engineering-principles']) {
+      assert.ok(fs.existsSync(path.join(ws, base, 'skills', s, 'SKILL.md')), `${base}/${s}`);
+    }
+  }
 });
 
 test.after(() => context.subscriptions.forEach((s) => s.dispose?.()));

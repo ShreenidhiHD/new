@@ -11,6 +11,7 @@ fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
 fs.cpSync(path.join(root, 'src'), out, { recursive: true });
 fs.copyFileSync(path.join(root, 'agents.json'), path.join(out, 'agents.json'));
+fs.cpSync(path.join(root, 'skills'), path.join(out, 'skills'), { recursive: true });
 fs.copyFileSync(path.join(root, 'examples', 'AGENT_INSTRUCTIONS.md'), path.join(out, 'AGENT_INSTRUCTIONS.md'));
 // The server is ESM; the extension is CommonJS.
 fs.writeFileSync(path.join(out, 'package.json'), JSON.stringify({ type: 'module' }, null, 2) + '\n');

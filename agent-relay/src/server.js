@@ -129,6 +129,7 @@ export async function callTool(name, a = {}) {
     case 'update_task':
       return text(bus.updateTask({ id: a.task_id, by: AGENT, status: a.status, result: a.result, note: a.note }));
     case 'ask_agent': {
+      bus.checkSend({ from: AGENT, to: a.agent, body: a.prompt }); // stop repeated identical asks / runaway rates
       const answer = await askAgent({
         agents: loadAgents(),
         agent: a.agent,
@@ -138,8 +139,8 @@ export async function callTool(name, a = {}) {
         self: AGENT,
       });
       // Keep an audit trail on the bus.
-      const q = bus.send({ from: AGENT, to: a.agent, subject: '[ask]', body: a.prompt });
-      bus.send({ from: a.agent, to: AGENT, subject: '[answer]', body: answer || '(empty)', threadId: q.threadId });
+      const q = bus.send({ from: AGENT, to: a.agent, subject: '[ask]', body: a.prompt, enforce: false });
+      bus.send({ from: a.agent, to: AGENT, subject: '[answer]', body: answer || '(empty)', threadId: q.threadId, enforce: false });
       return text(answer || '(empty response)');
     }
     default:
@@ -163,7 +164,7 @@ async function handle(msg) {
         return reply(id, {
           protocolVersion: params.protocolVersion || PROTOCOL_VERSION,
           capabilities: { tools: { listChanged: false } },
-          serverInfo: { name: 'agent-relay', version: '0.1.0' },
+          serverInfo: { name: 'agent-relay', version: '0.2.0' },
           instructions:
             `You are "${AGENT}" on a shared agent bus. Call read_inbox at the start of a task and after finishing one; ` +
             'use handoff_task / ask_agent to involve other agents, and update_task to report results.',

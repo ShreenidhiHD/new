@@ -10,6 +10,7 @@ Installing this extension **registers the Agent Relay MCP server with VS Code au
 2. Open Copilot Chat, switch to **Agent** mode, click **Tools 🔧** and make sure **Agent Relay** is enabled.
 3. Run **Agent Relay: Set Up Claude Code** from the Command Palette. This registers the same relay with Claude Code using `claude mcp add`.
 4. Optional: run **Agent Relay: Add Agent Instructions to Workspace**. It writes short instructions to `.github/copilot-instructions.md` and `CLAUDE.md` so both agents check their inbox.
+5. Optional: run **Agent Relay: Install Skills to Workspace**. It adds 6 agent skills to `.github/skills` and `.claude/skills`: collaboration, loop safety, troubleshooting, engineering principles, systematic debugging, and cross-agent review.
 
 Then try it in Copilot Chat:
 
@@ -23,7 +24,8 @@ And in Claude Code:
 
 - **MCP tools for Copilot:** `send_message`, `read_inbox`, `handoff_task`, `update_task`, `list_tasks`, `ask_agent` (runs `claude -p` / `gemini -p` / `copilot -p`), and more.
 - **Status bar badge** with your unread relay messages. A notification can send them straight to Copilot Chat.
-- **Commands:** Show Inbox, Show Tasks, Send Message, Set Up Claude Code, Add Agent Instructions.
+- **Commands:** Show Inbox, Show Tasks, Send Message, Set Up Claude Code, Add Agent Instructions, Install Skills.
+- **Loop guards:** the relay refuses runaway agent-to-agent loops (ping-pong threads, duplicate messages, tasks bounced back, deep `ask_agent` nesting) and tells the agent to ask you instead.
 
 ## Settings
 

@@ -6,6 +6,7 @@
 //   agent-relay ask <agent> <prompt...>
 import { Bus } from './bus.js';
 import { loadAgents, askAgent } from './agents.js';
+import { installSkills, listSkills } from './skills.js';
 
 const print = (v) => console.log(typeof v === 'string' ? v : JSON.stringify(v, null, 2));
 
@@ -31,6 +32,17 @@ try {
     case 'ask':
       print(await askAgent({ agents: loadAgents(), agent: rest[0], prompt: rest.slice(1).join(' '), self: 'human' }));
       break;
+    case 'skills':
+      print(listSkills());
+      break;
+    case 'install-skills': {
+      const user = rest.includes('--user');
+      const targets = rest.includes('--claude') ? ['claude'] : rest.includes('--copilot') ? ['copilot'] : ['claude', 'copilot'];
+      const dir = rest.find((a) => !a.startsWith('--'));
+      const written = installSkills({ projectDir: dir || process.cwd(), user, targets });
+      print(`Installed ${written.length} skill folders:\n` + written.map((w) => `  ${w}`).join('\n'));
+      break;
+    }
     case 'watch': {
       const agent = rest[0] || 'human';
       console.error(`watching inbox of "${agent}" in ${bus.dir} (Ctrl+C to stop)`);
@@ -38,7 +50,7 @@ try {
       break;
     }
     default:
-      print('usage: agent-relay <serve | inbox [agent] | send <from> <to> <msg> | threads | thread <id> | tasks [status] | ask <agent> <prompt> | watch [agent]>');
+      print('usage: agent-relay <serve | inbox [agent] | send <from> <to> <msg> | threads | thread <id> | tasks [status] | ask <agent> <prompt> | watch [agent] | skills | install-skills [dir] [--claude|--copilot|--user]>');
       process.exitCode = cmd ? 1 : 0;
   }
 } catch (e) {

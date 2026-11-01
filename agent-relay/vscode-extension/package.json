@@ -2,7 +2,7 @@
   "name": "agent-relay",
   "displayName": "Agent Relay — Claude Code ⇄ Copilot",
   "description": "Lets GitHub Copilot (any model: Gemini, GPT, Claude…) and Claude Code message each other, hand off tasks, and ask each other directly. Registers the Agent Relay MCP server automatically.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "shreenidhihd",
   "license": "MIT",
   "repository": { "type": "git", "url": "https://github.com/ShreenidhiHD/agent-relay" },
@@ -21,7 +21,8 @@
       { "command": "agentRelay.showTasks", "title": "Agent Relay: Show Tasks" },
       { "command": "agentRelay.sendMessage", "title": "Agent Relay: Send Message" },
       { "command": "agentRelay.setupClaudeCode", "title": "Agent Relay: Set Up Claude Code" },
-      { "command": "agentRelay.copyInstructions", "title": "Agent Relay: Add Agent Instructions to Workspace" }
+      { "command": "agentRelay.copyInstructions", "title": "Agent Relay: Add Agent Instructions to Workspace" },
+      { "command": "agentRelay.installSkills", "title": "Agent Relay: Install Skills to Workspace (Claude Code + Copilot)" }
     ],
     "configuration": {
       "title": "Agent Relay",

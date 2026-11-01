@@ -97,7 +97,7 @@ function activate(context) {
                 AGENT_RELAY_DIR: c.busDir,
                 AGENT_RELAY_AGENTS: agentsFilePath(context),
               },
-              context.extension?.packageJSON?.version || '0.1.0',
+              context.extension?.packageJSON?.version || '0.2.0',
             ),
           ];
         },
@@ -246,6 +246,23 @@ function activate(context) {
       done.push(rel);
     }
     vscode.window.showInformationMessage(done.length ? `Agent Relay instructions added to ${done.join(' and ')}.` : 'Instructions already present.');
+  });
+
+  reg('agentRelay.installSkills', async () => {
+    const folder = vscode.workspace.workspaceFolders?.[0];
+    if (!folder) return vscode.window.showWarningMessage('Open a folder first.');
+    const choice = await vscode.window.showQuickPick(
+      [
+        { label: 'Claude Code + Copilot', description: '.claude/skills and .github/skills', targets: ['claude', 'copilot'] },
+        { label: 'Copilot only', description: '.github/skills', targets: ['copilot'] },
+        { label: 'Claude Code only', description: '.claude/skills', targets: ['claude'] },
+      ],
+      { title: 'Install agent-relay skills into this workspace' },
+    );
+    if (!choice) return;
+    const mod = await import(pathToFileURL(path.join(context.extensionPath, 'server', 'skills.js')).href);
+    const written = mod.installSkills({ projectDir: folder.uri.fsPath, targets: choice.targets });
+    vscode.window.showInformationMessage(`Agent Relay: installed ${mod.listSkills().length} skills (${written.length} folders). Commit them so teammates' agents get them too.`);
   });
 
   // First run: offer Claude Code setup once.

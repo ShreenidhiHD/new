@@ -29,6 +29,26 @@ function newId(prefix) {
   return `${prefix}_${Date.now().toString(36).padStart(9, '0')}_${crypto.randomBytes(3).toString('hex')}`;
 }
 
+// Loop guards. Agents talking to agents can ping-pong forever ("thanks!" /
+// "you're welcome!" / "anything else?"), re-hand the same task back and forth,
+// or retry a failing call in a tight loop. These limits stop that in the bus
+// itself, so it holds even when an agent ignores its instructions.
+// The sender "human" is never limited.
+export const LIMITS = {
+  maxThreadMessages: Number(process.env.AGENT_RELAY_MAX_THREAD || 30),
+  maxSendsPerMinute: Number(process.env.AGENT_RELAY_RATE_PER_MIN || 20),
+  duplicateWindowSec: Number(process.env.AGENT_RELAY_DUP_WINDOW_SEC || 120),
+  maxTaskUpdates: Number(process.env.AGENT_RELAY_MAX_TASK_UPDATES || 25),
+};
+
+export class LoopGuardError extends Error {
+  constructor(message) {
+    super(`LOOP GUARD: ${message} Stop and ask the human how to proceed; do not retry.`);
+    this.name = 'LoopGuardError';
+  }
+}
+
+const FINAL = new Set(['done', 'failed', 'cancelled']);
 const TASK_STATUSES = ['open', 'claimed', 'done', 'failed', 'cancelled'];
 
 export class Bus {
@@ -41,10 +61,35 @@ export class Bus {
   }
 
   // ---------- messages ----------
-  send({ from, to, body, subject = '', threadId, taskId }) {
+  /** Throws LoopGuardError if this send looks like a runaway loop. */
+  checkSend({ from, to, body, threadId }) {
+    if (from === 'human') return;
+    const now = Date.now();
+    const msgs = this.allMessages();
+    if (threadId) {
+      const n = msgs.filter((m) => m.threadId === threadId).length;
+      if (n >= LIMITS.maxThreadMessages) {
+        throw new LoopGuardError(`thread ${threadId} already has ${n} messages (limit ${LIMITS.maxThreadMessages}).`);
+      }
+    }
+    const recent = msgs.filter((m) => m.from === from && now - Date.parse(m.createdAt) < 60_000);
+    if (recent.length >= LIMITS.maxSendsPerMinute) {
+      throw new LoopGuardError(`"${from}" sent ${recent.length} messages in the last minute (limit ${LIMITS.maxSendsPerMinute}).`);
+    }
+    const norm = (x) => String(x).trim().toLowerCase().replace(/\s+/g, ' ');
+    const dup = msgs.find(
+      (m) => m.from === from && m.to === to && norm(m.body) === norm(body) && now - Date.parse(m.createdAt) < LIMITS.duplicateWindowSec * 1000,
+    );
+    if (dup) {
+      throw new LoopGuardError(`identical message to "${to}" was already sent (${dup.id}).`);
+    }
+  }
+
+  send({ from, to, body, subject = '', threadId, taskId, enforce = true }) {
     if (!from) throw new Error('from is required');
     if (!to) throw new Error('to is required');
     if (!body) throw new Error('body is required');
+    if (enforce) this.checkSend({ from, to, body, threadId });
     const id = newId('msg');
     const msg = {
       id,
@@ -116,6 +161,18 @@ export class Bus {
   // ---------- tasks (handoffs) ----------
   createTask({ from, to, title, details = '', context = {} }) {
     if (!title) throw new Error('title is required');
+    if (from !== 'human') {
+      const norm = (x) => String(x).trim().toLowerCase();
+      for (const t of this.listTasks()) {
+        if (FINAL.has(t.status) || norm(t.title) !== norm(title)) continue;
+        if (t.from === to && t.to === from) {
+          throw new LoopGuardError(`"${to}" handed you this same task (${t.id}); handing it back creates a loop. Do it, or mark it failed with a reason.`);
+        }
+        if (t.from === from && t.to === to) {
+          throw new LoopGuardError(`you already handed this task to "${to}" (${t.id}, ${t.status}). Wait for it or update it.`);
+        }
+      }
+    }
     const id = newId('task');
     const now = new Date().toISOString();
     const task = {
@@ -159,6 +216,12 @@ export class Bus {
       throw new Error(`status must be one of ${TASK_STATUSES.join(', ')}`);
     }
     const t = this.getTask(id);
+    if (by !== 'human' && t.history.length >= LIMITS.maxTaskUpdates) {
+      throw new LoopGuardError(`task ${id} has been updated ${t.history.length} times (limit ${LIMITS.maxTaskUpdates}).`);
+    }
+    if (by !== 'human' && FINAL.has(t.status) && status && status !== 'open') {
+      throw new LoopGuardError(`task ${id} is already ${t.status}.`);
+    }
     if (status === 'claimed') {
       if (t.status === 'claimed' && t.claimedBy && t.claimedBy !== by) {
         throw new Error(`task already claimed by ${t.claimedBy}`);
@@ -176,7 +239,8 @@ export class Bus {
     const lines = [`Task "${t.title}" is now ${t.status}.`];
     if (note) lines.push(`Note: ${note}`);
     if (result !== undefined) lines.push(`Result:\n${result}`);
-    this.send({ from: by, to: other, subject: `[task ${t.status}] ${t.title}`, body: lines.join('\n'), threadId: id, taskId: id });
+    // Status notifications are bounded by maxTaskUpdates, so skip send guards.
+    this.send({ from: by, to: other, subject: `[task ${t.status}] ${t.title}`, body: lines.join('\n'), threadId: id, taskId: id, enforce: false });
     return t;
   }
 }

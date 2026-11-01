@@ -22,6 +22,8 @@ It is a small **MCP server** with no dependencies. Every coding agent loads it. 
  ask_agent ──► runs `gemini -p` / `claude -p` / `copilot -p` headlessly
 ```
 
+📖 **Docs:** [How it works](docs/HOW-IT-WORKS.md) · [Skills](docs/SKILLS.md) · [Loop safety](skills/agent-relay-loop-safety/SKILL.md) · [Troubleshooting](skills/agent-relay-troubleshooting/SKILL.md)
+
 ## Requirements
 
 - Node.js 18 or newer. There are no npm dependencies.
@@ -61,7 +63,39 @@ For VS Code without the extension, copy `examples/.vscode/mcp.json` to `.vscode/
 
 ### Tell the agents to use it
 
-Paste `examples/AGENT_INSTRUCTIONS.md` into `CLAUDE.md` and into `.github/copilot-instructions.md`. The extension's **Add Agent Instructions** command does this for you.
+1. **Instructions:** paste `examples/AGENT_INSTRUCTIONS.md` into `CLAUDE.md` and into `.github/copilot-instructions.md`. The extension's **Add Agent Instructions** command does this for you.
+2. **Skills:** run `agent-relay install-skills /path/to/project`, or in VS Code run **Agent Relay: Install Skills to Workspace**. Then commit `.claude/skills` and `.github/skills`.
+
+## Skills
+
+Six agent skills ship with the project. Claude Code and Copilot load each one only when it's relevant. Details are in [docs/SKILLS.md](docs/SKILLS.md).
+
+| Skill | Purpose |
+|---|---|
+| `agent-relay-collaboration` | Which tool to use, the task lifecycle, writing handoffs and asks, when to escalate |
+| `agent-relay-loop-safety` | Recognising and breaking agent loops, plus the relay's hard limits |
+| `agent-relay-troubleshooting` | Step-by-step fixes when the relay misbehaves |
+| `engineering-principles` | Think first, keep it simple, make surgical changes, verify (inspired by Karpathy) |
+| `systematic-debugging` | Reproduce → isolate → hypothesize → fix → verify, with attempt limits |
+| `cross-agent-review` | Getting and acting on reviews from another model, without endless review rounds |
+
+## Loop safety
+
+Agents replying to agents can loop forever: "thanks" / "you're welcome" ping-pong, a task handed back and forth, A asks B which asks A, or the same failing call retried over and over. agent-relay stops this in two layers:
+
+- **Skills** teach agents not to start loops: no acknowledgement messages, max 2 retries, max 2 review rounds, escalate to the human.
+- **Hard limits in the relay** apply even if an agent ignores the skills. A blocked call returns `LOOP GUARD: … Stop and ask the human`.
+
+| Limit | Default | Env var |
+|---|---|---|
+| Messages per thread | 30 | `AGENT_RELAY_MAX_THREAD` |
+| Messages per agent per minute | 20 | `AGENT_RELAY_RATE_PER_MIN` |
+| Identical message to the same agent | refused for 120 s | `AGENT_RELAY_DUP_WINDOW_SEC` |
+| Updates per task | 25 | `AGENT_RELAY_MAX_TASK_UPDATES` |
+| `ask_agent` nesting depth | 2 | `AGENT_RELAY_MAX_DEPTH` |
+| Handing a task back to its sender, duplicate handoffs, changing a finished task | refused | n/a |
+
+The sender `human` is never limited.
 
 ## Try the demo
 
@@ -118,7 +152,7 @@ Claude Code claims the task, does the work, and calls `update_task done` with a 
 | `AGENT_NAME` | `unknown-agent` | This agent's address on the bus (`claude-code`, `copilot`, …) |
 | `AGENT_RELAY_DIR` | `~/.agent-relay` | Shared storage. Set a per-project path to keep projects separate |
 | `AGENT_RELAY_AGENTS` | `./agents.json` | Which agents `ask_agent` can run, and with which command |
-| `AGENT_RELAY_MAX_DEPTH` | `2` | Loop guard. Stops chains like A asks B, which asks A, and so on |
+| `AGENT_RELAY_MAX_DEPTH` and the other `AGENT_RELAY_*` limits | see [Loop safety](#loop-safety) | Loop guards |
 
 `agents.json` maps an agent name to a command. `{prompt}` is replaced by the prompt and passed as a single argument. No shell is involved, so a prompt can't inject commands. Change the model flags there, for example `gemini -m <model>` or `copilot --model <model>`. Check the flags against the CLI versions you have installed.
 
@@ -130,7 +164,10 @@ node src/cli.js send human '*' "Freeze main, release in 10 min"
 node src/cli.js tasks open
 node src/cli.js thread <thread_id>
 node src/cli.js ask gemini "Explain this regex: ^(?=.*\d).{8,}$"
+node src/cli.js install-skills ~/my-project   # add skills for Claude Code + Copilot
 ```
+
+If the package is installed (or you use `npx -y github:ShreenidhiHD/agent-relay <cmd>`), use `agent-relay <cmd>` instead of `node src/cli.js <cmd>`.
 
 ## Safety notes
 
