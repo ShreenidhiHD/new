@@ -1,9 +1,9 @@
 {
   "mcpServers": {
-    "agent-bus": {
+    "agent-relay": {
       "type": "stdio",
       "command": "node",
-      "args": ["/ABSOLUTE/PATH/TO/coding-agent-communication/src/server.js"],
+      "args": ["/ABSOLUTE/PATH/TO/agent-relay/src/server.js"],
       "env": { "AGENT_NAME": "claude-code" }
     }
   }

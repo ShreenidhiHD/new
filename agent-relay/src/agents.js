@@ -5,9 +5,9 @@ import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-export const MAX_DEPTH = Number(process.env.AGENT_BUS_MAX_DEPTH || 2);
+export const MAX_DEPTH = Number(process.env.AGENT_RELAY_MAX_DEPTH || 2);
 
-export function loadAgents(file = process.env.AGENT_BUS_AGENTS || path.join(here, '..', 'agents.json')) {
+export function loadAgents(file = process.env.AGENT_RELAY_AGENTS || path.join(here, '..', 'agents.json')) {
   const cfg = JSON.parse(fs.readFileSync(file, 'utf8'));
   return cfg.agents || {};
 }
@@ -24,19 +24,19 @@ export function askAgent({ agents, agent, prompt, cwd, timeoutSec = 600, self })
   if (agent === self) return Promise.reject(new Error('refusing to ask yourself'));
 
   // Loop guard: A asks B asks A asks B ... is stopped at MAX_DEPTH.
-  const depth = Number(process.env.AGENT_BUS_DEPTH || 0);
+  const depth = Number(process.env.AGENT_RELAY_DEPTH || 0);
   if (depth >= MAX_DEPTH) {
     return Promise.reject(new Error(`ask_agent nesting limit reached (depth ${depth} >= ${MAX_DEPTH})`));
   }
 
-  const preamble = self ? `[Request from agent "${self}" via coding-agent-communication]\n\n` : '';
+  const preamble = self ? `[Request from agent "${self}" via agent-relay]\n\n` : '';
   const args = buildArgs(spec.args || ['{prompt}'], preamble + prompt);
 
   return new Promise((resolve, reject) => {
     // No shell: the prompt is a single argv entry, so it cannot inject commands.
     const child = spawn(spec.command, args, {
       cwd: cwd || process.cwd(),
-      env: { ...process.env, ...(spec.env || {}), AGENT_BUS_DEPTH: String(depth + 1) },
+      env: { ...process.env, ...(spec.env || {}), AGENT_RELAY_DEPTH: String(depth + 1) },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     let out = '';

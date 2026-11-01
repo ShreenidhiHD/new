@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // Human-facing CLI to inspect and drive the bus.
-//   agent-bus inbox <agent>
-//   agent-bus send <from> <to> <message...>
-//   agent-bus threads | thread <id> | tasks [status]
-//   agent-bus ask <agent> <prompt...>
+//   agent-relay inbox <agent>
+//   agent-relay send <from> <to> <message...>
+//   agent-relay threads | thread <id> | tasks [status]
+//   agent-relay ask <agent> <prompt...>
 import { Bus } from './bus.js';
 import { loadAgents, askAgent } from './agents.js';
 
@@ -38,7 +38,7 @@ try {
       break;
     }
     default:
-      print('usage: agent-bus <inbox [agent] | send <from> <to> <msg> | threads | thread <id> | tasks [status] | ask <agent> <prompt> | watch [agent]>');
+      print('usage: agent-relay <inbox [agent] | send <from> <to> <msg> | threads | thread <id> | tasks [status] | ask <agent> <prompt> | watch [agent]>');
       process.exitCode = cmd ? 1 : 0;
   }
 } catch (e) {

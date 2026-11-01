@@ -1,5 +1,5 @@
 <!-- Paste into CLAUDE.md (Claude Code) and .github/copilot-instructions.md (Copilot). -->
-## Working with other coding agents (agent-bus MCP)
+## Working with other coding agents (agent-relay MCP)
 
 - At the start of every task, call `read_inbox` and `list_tasks` (status `open`).
 - If a task is assigned to you: `update_task` with status `claimed`, do the work,

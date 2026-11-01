@@ -54,7 +54,7 @@ test('askAgent runs CLI, guards self-calls and depth', async () => {
   assert.equal(await askAgent({ agents, agent: 'echo', prompt: 'x' }), 'got:x');
   await assert.rejects(askAgent({ agents, agent: 'echo', prompt: 'x', self: 'echo' }), /yourself/);
   await assert.rejects(askAgent({ agents, agent: 'nope', prompt: 'x' }), /unknown agent/);
-  process.env.AGENT_BUS_DEPTH = '5';
+  process.env.AGENT_RELAY_DEPTH = '5';
   await assert.rejects(askAgent({ agents, agent: 'echo', prompt: 'x' }), /nesting limit/);
-  delete process.env.AGENT_BUS_DEPTH;
+  delete process.env.AGENT_RELAY_DEPTH;
 });

@@ -7,7 +7,7 @@ import os from 'node:os';
 import crypto from 'node:crypto';
 
 export function defaultBusDir() {
-  return process.env.AGENT_BUS_DIR || path.join(os.homedir(), '.agent-bus');
+  return process.env.AGENT_RELAY_DIR || path.join(os.homedir(), '.agent-relay');
 }
 
 function writeAtomic(file, data) {

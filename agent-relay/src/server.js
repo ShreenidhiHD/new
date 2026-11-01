@@ -163,7 +163,7 @@ async function handle(msg) {
         return reply(id, {
           protocolVersion: params.protocolVersion || PROTOCOL_VERSION,
           capabilities: { tools: { listChanged: false } },
-          serverInfo: { name: 'coding-agent-communication', version: '0.1.0' },
+          serverInfo: { name: 'agent-relay', version: '0.1.0' },
           instructions:
             `You are "${AGENT}" on a shared agent bus. Call read_inbox at the start of a task and after finishing one; ` +
             'use handoff_task / ask_agent to involve other agents, and update_task to report results.',
@@ -208,5 +208,5 @@ if (isMain) {
     }
     handle(msg);
   });
-  process.stderr.write(`[coding-agent-communication] agent=${AGENT} bus=${bus.dir}\n`);
+  process.stderr.write(`[agent-relay] agent=${AGENT} bus=${bus.dir}\n`);
 }

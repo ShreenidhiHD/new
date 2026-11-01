@@ -11,7 +11,7 @@ const server = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'sr
 
 function client(agent, busDir, agentsFile) {
   const p = spawn(process.execPath, [server], {
-    env: { ...process.env, AGENT_NAME: agent, AGENT_BUS_DIR: busDir, AGENT_BUS_AGENTS: agentsFile },
+    env: { ...process.env, AGENT_NAME: agent, AGENT_RELAY_DIR: busDir, AGENT_RELAY_AGENTS: agentsFile },
     stdio: ['pipe', 'pipe', 'ignore'],
   });
   let buf = '';
@@ -49,7 +49,7 @@ test('claude-code and copilot talk through MCP', async () => {
   const copilot = client('copilot', dir, agentsFile);
   try {
     const init = await claude.rpc('initialize', { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 't', version: '1' } });
-    assert.equal(init.result.serverInfo.name, 'coding-agent-communication');
+    assert.equal(init.result.serverInfo.name, 'agent-relay');
     const tools = (await claude.rpc('tools/list', {})).result.tools.map((t) => t.name);
     assert.ok(tools.includes('ask_agent') && tools.includes('handoff_task'));
 
