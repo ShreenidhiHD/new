@@ -55,6 +55,39 @@ Copy `examples/.vscode/mcp.json` to `.vscode/mcp.json` in your workspace and fix
 
 Paste `examples/AGENT_INSTRUCTIONS.md` into `CLAUDE.md` and into `.github/copilot-instructions.md`.
 
+## Try the demo
+
+```bash
+npm run demo            # or: node examples/demo.js --json  (also prints raw tool results)
+```
+
+The demo starts two real agent-relay servers, `copilot` and `claude-code`, using a temporary store that it deletes afterwards. It runs a full round trip:
+
+```
+[VS Code Copilot · Gemini] handoff_task
+  Task "Add login tests" → claude-code  (task_..., open)
+
+[Claude Code] read_inbox
+  [task] Add login tests  from copilot
+
+[Claude Code] update_task
+  status: claimed
+
+[Claude Code] ask_agent
+  Gemini: auth.js line 42 compares passwords with ==; use crypto.timingSafeEqual.
+
+[Claude Code] update_task
+  status: done
+
+[VS Code Copilot · Gemini] read_inbox
+  [task done] Add login tests  from claude-code
+  Result: Added test/login.test.js (4 tests) and fixed timing-unsafe compare in auth.js.
+
+✓ Round trip complete: Copilot → Claude Code → Gemini → Claude Code → Copilot
+```
+
+You don't need any agent CLIs installed: a stand-in script plays `gemini`, and the agents' work is made-up example text.
+
 ## Example flows
 
 **Claude Code asks Gemini for a second opinion.** In Claude Code:
