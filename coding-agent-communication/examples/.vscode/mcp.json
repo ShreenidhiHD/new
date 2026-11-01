@@ -1,0 +1,10 @@
+{
+  "servers": {
+    "agent-bus": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/ABSOLUTE/PATH/TO/coding-agent-communication/src/server.js"],
+      "env": { "AGENT_NAME": "copilot" }
+    }
+  }
+}
